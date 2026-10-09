@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# forex-backup — snapshot the paper-trading bot's state.
+#
+# What gets backed up:
+#   storage/local.db   SQLite DB, copied via the sqlite3 backup API so the
+#                      snapshot is consistent even while daemons are writing
+#   data/              broker paper state (virtual balances, fills)
+#   agent.env          non-secret config
+#   install-result.json / install-state.json / run/heartbeat.json
+#
+# What NEVER gets backed up: secrets.env (private keys / tokens stay local).
+#
+# Layout: $FOREX_AGENT_HOME/backups/forex-backup-<UTC timestamp>.tar.gz
+# plus a sha256 sidecar and a manifest.jsonl entry.
+# Rotation: keeps the newest $KEEP_MOST snapshots (default 48).
+#
+# Remote upload: `./forex-backup --upload <dest>` where dest is one of
+# github | drive | gmail. Destinations are wired on request; until the
+# user picks one, --upload exits 2 with "not configured".
+set -u
+
+AGENT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+HOME_DIR="${FOREX_AGENT_HOME:-$HOME/.forex-agent}"
+BACKUP_DIR="$HOME_DIR/backups"
+KEEP_MOST="${FOREX_BACKUP_KEEP:-48}"
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+NAME="forex-backup-$STAMP"
+# Stage on the agent-home volume, not /tmp: this host's /tmp is a 512M tmpfs
+# while the SQLite DB alone is ~280M; staging snapshot+copy there overflows
+# /tmp and silently produces archives with 0-byte state files (2026-09-23).
+# An explicitly exported TMPDIR still wins.
+export TMPDIR="${TMPDIR:-$HOME_DIR/tmp}"
+mkdir -p "$TMPDIR"
+WORK="$(mktemp -d)"
+
+cleanup() { rm -rf "$WORK"; }
+trap cleanup EXIT
+
+mkdir -p "$BACKUP_DIR"
+
+# Remote upload: `./forex-backup --upload drive` pushes new archives via
+# scripts/forex-backup-upload (Google Drive). Other destinations not wired.
+if [ "${1:-}" = "--upload" ]; then
+    case "${2:-}" in
+        drive) exec "$(dirname "$0")/forex-backup-upload" ;;
+        *) echo "unknown upload destination '${2:-}' (only 'drive' is wired)" >&2; exit 2 ;;
+    esac
+fi
+
+# 1. SQLite-safe DB snapshot
+DB_SRC="${FOREX_AGENT_STORAGE:-$HOME_DIR/storage/local.db}"
+# Backup throttle: copy in batches of $FOREX_BACKUP_PAGES pages, sleeping
+# $FOREX_BACKUP_SLEEP seconds between batches, so daemon writers are never
+# starved for the whole copy (previously a single lock hold crashed daemon
+# ticks with "database is locked"). Default is now -1 (single-step copy):
+# on the current 1.4GB busy DB the old 100/0.1 throttle never finished
+# because every ~10s writer commit restarted the online backup from
+# scratch (2026-09-23, re-confirmed 2026-10-02 — hung hourly runs had to
+# be killed). Single-step completes in ~60s with daemons unaffected.
+# Override with FOREX_BACKUP_PAGES/SLEEP if throttling is ever needed.
+BACKUP_PAGES="${FOREX_BACKUP_PAGES:--1}"
+BACKUP_SLEEP="${FOREX_BACKUP_SLEEP:-0.1}"
+if [ -f "$DB_SRC" ]; then
+    python3 - "$DB_SRC" "$WORK/local.db" "$BACKUP_PAGES" "$BACKUP_SLEEP" <<'PYEOF'
+import sqlite3, sys
+src = sqlite3.connect(sys.argv[1])
+dst = sqlite3.connect(sys.argv[2])
+with dst:
+    src.backup(dst, pages=int(sys.argv[3]), sleep=float(sys.argv[4]))
+dst.close(); src.close()
+PYEOF
+    echo "db snapshot ok"
+else
+    echo "warning: no DB at $DB_SRC" >&2
+fi
+
+# 2. Stage files (never secrets.env)
+STAGE="$WORK/stage"
+mkdir -p "$STAGE"
+[ -f "$WORK/local.db" ] && cp "$WORK/local.db" "$STAGE/local.db"
+[ -d "$HOME_DIR/data" ] && cp -r "$HOME_DIR/data" "$STAGE/data"
+for f in agent.env install-result.json install-state.json; do
+    [ -f "$HOME_DIR/$f" ] && cp "$HOME_DIR/$f" "$STAGE/$f"
+done
+[ -f "$HOME_DIR/run/heartbeat.json" ] && cp "$HOME_DIR/run/heartbeat.json" "$STAGE/heartbeat.json"
+echo "$STAMP" > "$STAGE/backup-timestamp.txt"
+
+# 3. Archive + checksum
+ARCHIVE="$BACKUP_DIR/$NAME.tar.gz"
+tar -czf "$ARCHIVE" -C "$STAGE" .
+sha256sum "$ARCHIVE" | awk '{print $1}' > "$ARCHIVE.sha256"
+SIZE="$(du -h "$ARCHIVE" | cut -f1)"
+
+# 4. Manifest
+SHA="$(cat "$ARCHIVE.sha256")"
+python3 - "$BACKUP_DIR/manifest.jsonl" "$NAME.tar.gz" "$SIZE" "$SHA" <<'PYEOF'
+import json, sys, datetime
+entry = {
+    "file": sys.argv[2],
+    "size": sys.argv[3],
+    "sha256": sys.argv[4],
+    "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+}
+with open(sys.argv[1], "a") as f:
+    f.write(json.dumps(entry) + "\n")
+PYEOF
+
+# 5. Rotation: keep newest $KEEP_MOST
+ls -1t "$BACKUP_DIR"/forex-backup-*.tar.gz 2>/dev/null | tail -n +$((KEEP_MOST + 1)) | while read -r old; do
+    rm -f "$old" "$old.sha256"
+    echo "pruned $old"
+done
+
+echo "backup ok: $NAME.tar.gz ($SIZE)"

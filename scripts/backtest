@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# backtest — replay recorded launch histories through entry/exit rules.
+#
+# Usage:
+#   scripts/backtest [dataset] [--min-safety N] [--tp 2:0.5,5:0.25]
+#                    [--trailing N] [--time-stop-h N]
+#
+# Paper only, no network. With no recorded dataset yet it prints a note
+# and exits 0 — the recorder builds the dataset from live paper flow.
+set -euo pipefail
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO"
+exec /home/hatch/workspace/Forex-agent/.venv/bin/python \
+    daemon/launch_scanner/backtest.py "$@"

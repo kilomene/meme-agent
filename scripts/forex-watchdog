@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# forex-watchdog — keep the paper-trading daemons alive + heartbeat.
+#
+# Intended to run every few minutes from the platform scheduler.
+#   - `forex-daemons start` is idempotent: already-running daemons are a
+#     no-op, stopped/stale ones are relaunched. So this script simply
+#     starts, diffs before/after state, and records a heartbeat.
+#   - Heartbeat: $FOREX_AGENT_HOME/run/heartbeat.json (checked_at, daemon
+#     states, actions taken). If this file goes stale, the scheduler
+#     itself isn't firing.
+#   - Log: $FOREX_AGENT_HOME/log/watchdog.log
+#
+# Exit 0 always on a completed check (a dead daemon that was restarted is
+# a success, not a failure). Exit 2 if the daemons script itself errors.
+set -u
+
+AGENT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+HOME_DIR="${FOREX_AGENT_HOME:-$HOME/.forex-agent}"
+RUN_DIR="$HOME_DIR/run"
+LOG_DIR="$HOME_DIR/log"
+HEARTBEAT="$RUN_DIR/heartbeat.json"
+WLOG="$LOG_DIR/watchdog.log"
+DAEMONS_BIN="$AGENT_ROOT/scripts/forex-daemons"
+
+mkdir -p "$RUN_DIR" "$LOG_DIR"
+ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+
+before="$(FOREX_AGENT_HOME="$HOME_DIR" "$DAEMONS_BIN" status 2>&1)" || exit 2
+start_out="$(FOREX_AGENT_HOME="$HOME_DIR" "$DAEMONS_BIN" start 2>&1)" || exit 2
+after="$(FOREX_AGENT_HOME="$HOME_DIR" "$DAEMONS_BIN" status 2>&1)" || exit 2
+
+actions="none"
+if [ "$before" != "$after" ]; then
+    actions="restarted dead daemons"
+fi
+
+# Wedge detection: a stale SQLite journal means a daemon is holding an
+# uncommitted write transaction, which blocks every other writer until
+# the process dies. The hourly backup only ever reads, so a journal
+# older than 2 minutes is never legitimate — find the holder and
+# restart that daemon. (2026-09-29: four wedges, all previously needed
+# a manual kill -9 because the wedged process still looked "alive".)
+JOURNAL="$HOME_DIR/storage/local.db-journal"
+if [ -f "$JOURNAL" ]; then
+    now=$(date +%s); mtime=$(stat -c %Y "$JOURNAL" 2>/dev/null || echo "$now")
+    if [ $((now - mtime)) -gt 120 ]; then
+        holder=$(fuser "$JOURNAL" 2>/dev/null | tr -s ' ' '\n' | grep -E '^[0-9]+$' | head -1)
+        if [ -n "$holder" ]; then
+            for name in market_monitor signal_monitor position_monitor health_monitor telegram launch_scanner; do
+                pid=$(cat "$RUN_DIR/$name.pid" 2>/dev/null || true)
+                if [ -n "$pid" ] && [ "$pid" = "$holder" ]; then
+                    echo "$(ts) wedge: $name (pid $holder) holding stale journal, restarting" >> "$WLOG"
+                    FOREX_AGENT_HOME="$HOME_DIR" "$DAEMONS_BIN" restart "$name" >> "$WLOG" 2>&1
+                    actions="wedge-restart:$name"
+                    after="$(FOREX_AGENT_HOME="$HOME_DIR" "$DAEMONS_BIN" status 2>&1)" || exit 2
+                    break
+                fi
+            done
+            if [ "$actions" = "none" ]; then
+                echo "$(ts) wedge: stale journal held by unknown pid $holder" >> "$WLOG"
+            fi
+        fi
+    fi
+fi
+
+python3 - "$HEARTBEAT" "$after" "$actions" <<'PYEOF'
+import json, sys, datetime
+hb = {
+    "checked_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    "daemons": sys.argv[2].splitlines(),
+    "actions": sys.argv[3],
+}
+with open(sys.argv[1], "w") as f:
+    json.dump(hb, f, indent=2)
+PYEOF
+
+echo "$(ts) watchdog | actions: $actions" >> "$WLOG"
+if [ "$actions" != "none" ]; then
+    echo "$(ts) --- before ---" >> "$WLOG"; echo "$before" >> "$WLOG"
+    echo "$(ts) --- after ---" >> "$WLOG"; echo "$after" >> "$WLOG"
+fi
+
+echo "watchdog ok | actions: $actions"
+echo "$after"

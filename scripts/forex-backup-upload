@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# forex-backup-upload — push the newest local backup to Google Drive.
+#
+# Reads the Drive folder id from $FOREX_AGENT_HOME/backup-drive-folder-id
+# (written by the Drive wiring step; not a secret, just a folder id).
+#
+# Uploads the newest forex-backup-*.tar.gz that has not been uploaded yet
+# (tracked in $FOREX_AGENT_HOME/backups/uploaded-to-drive.txt).
+#
+# Non-fatal by design: exit 0 when there is nothing new; exit 1 with a
+# message when an upload fails, but never delete local backups.
+# The hourly cron runs backup first, then this, so a Drive outage never
+# costs us the local copy.
+set -u
+
+HOME_DIR="${FOREX_AGENT_HOME:-$HOME/.forex-agent}"
+BACKUP_DIR="$HOME_DIR/backups"
+FOLDER_ID_FILE="$HOME_DIR/backup-drive-folder-id"
+UPLOADED_LIST="$BACKUP_DIR/uploaded-to-drive.txt"
+LOG="$HOME_DIR/log/backup-upload.log"
+
+mkdir -p "$HOME_DIR/log"
+ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+
+if [ ! -f "$FOLDER_ID_FILE" ]; then
+    echo "$(ts) upload skipped: no Drive folder configured" >> "$LOG"
+    echo "upload skipped: Drive folder not configured"
+    exit 0
+fi
+FOLDER_ID="$(cat "$FOLDER_ID_FILE")"
+touch "$UPLOADED_LIST"
+
+uploaded=0
+failed=0
+for archive in $(ls -1t "$BACKUP_DIR"/forex-backup-*.tar.gz 2>/dev/null); do
+    name="$(basename "$archive")"
+    if grep -qxF "$name" "$UPLOADED_LIST" 2>/dev/null; then
+        continue
+    fi
+    if out="$(hatch_gws_cli drive +upload "$archive" --parent "$FOLDER_ID" 2>&1)"; then
+        echo "$name" >> "$UPLOADED_LIST"
+        echo "$(ts) uploaded $name" >> "$LOG"
+        uploaded=$((uploaded + 1))
+    else
+        echo "$(ts) FAILED $name: $(echo "$out" | head -10)" >> "$LOG"
+        failed=$((failed + 1))
+    fi
+done
+
+echo "$(ts) upload run done: $uploaded uploaded, $failed failed" >> "$LOG"
+echo "upload ok: $uploaded new, $failed failed"
+
+# Drive-side rotation: keep the newest DRIVE_KEEP archives in the Drive
+# folder so hourly uploads never fill the quota again (2026-10-05: a
+# 100-archive pileup hit storageQuotaExceeded and stalled uploads).
+DRIVE_KEEP=24
+if [ "$failed" -eq 0 ] && [ -n "${FOLDER_ID:-}" ]; then
+    pruned=0
+    ids="$(hatch_gws_cli drive files list --page-all \
+            --params "{\"q\":\"'$FOLDER_ID' in parents and trashed=false\",\"fields\":\"files(id,name)\",\"pageSize\":100}" \
+            --format json 2>/dev/null | python3 -c "
+import json,sys
+raw=sys.stdin.read(); docs,buf,depth=[],[],0
+for line in raw.split(chr(10)):
+    s=line.strip()
+    if not s: continue
+    if s.startswith('{') and depth==0 and buf: docs.append(chr(10).join(buf)); buf=[]
+    buf.append(line); depth+=s.count('{')-s.count('}')
+if buf: docs.append(chr(10).join(buf))
+files=[]
+for d in docs:
+    try: files.extend(json.loads(d).get('files',[]))
+    except Exception: pass
+files=sorted(files,key=lambda f:f['name'])
+for f in files[:-24]:
+    if f['name'].startswith('forex-backup-') and f['name'].endswith('.tar.gz'):
+        print(f['id'])
+" 2>/dev/null)"
+    for fid in $ids; do
+        if hatch_gws_cli drive files delete --params "{\"fileId\":\"$fid\"}" >/dev/null 2>&1; then
+            pruned=$((pruned + 1))
+        fi
+    done
+    if [ "$pruned" -gt 0 ]; then
+        echo "$(ts) drive rotation: pruned $pruned old archives, kept newest $DRIVE_KEEP" >> "$LOG"
+    fi
+fi
+
+[ "$failed" -eq 0 ]

@@ -1,0 +1,1258 @@
+# forex-agent — default configuration.
+#
+# This file holds every NON-SECRET setting. Secrets (WORKER_API_KEY)
+# come from environment variables or a 0600 secrets file (see
+# FOREX_SECRETS_FILE) — never here, never in code, never in logs.
+# (The memecoin provider needs no secrets: the wallet public key is
+# public, and the wallet secret must never leave your custody.)
+#
+# Environment variables override anything in this file. See config.py
+# for the full env-var → setting map (original bridge keys preserved).
+
+# dry_run | live
+# dry_run is the default and blocks ALL live orders at the execution
+# gateway. Switching to live requires deliberately editing this (or
+# setting DRY_RUN=false / MODE=live) AND providing broker credentials.
+mode: dry_run
+
+broker:
+  provider: memecoin  # memecoin | disconnected
+
+# Memecoin provider settings (broker/memecoin/RUNTIME.md). The paper
+# engine needs nothing here to run; live mode additionally requires
+# MEMECOIN_LIVE_ARMED=true and MEMECOIN_WALLET_PUBKEY (public key only)
+# in the environment — and still fails closed until a real execution
+# path exists.
+memecoin:
+  data_dir: ""          # default: $FOREX_AGENT_HOME/data/memecoin
+  paper_start_sol: 10.0 # virtual starting balance for fresh paper state
+  live_armed: false
+  wallet_pubkey: ""     # env MEMECOIN_WALLET_PUBKEY preferred
+  symbols:             # SYMBOL: mint pairs — broker registry. NOTE: a coin is only
+                       # *monitored* if it is ALSO listed under top-level `symbols:` below.
+    BONK: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"   # verified via DexScreener 2026-09-22
+    POPCAT: "6RLhPtPZGED9sdiwCKzhug6rej2tsL69rcPh4JHKK7cY"  # (pool unverified — see ops notes)
+    SATOSHINU: "HzaCANKGkhNcQGb1VWL8f4tHJYrCmaXrPWk9eHR7GYYX"  # added 2026-09-22 20:26 WAT
+    LOOONGCAT: "5tYcEEKvN63RrzpomgF2jWMxJMHmr4Zo19RX1mXipump"  # added 2026-09-22 20:26 WAT
+    PIXEL: "Hm7hzzgxBt1B3758w2KjnoYvwG3UequDL7zuVqFgEdty"
+    SDESK: "Dx3d7t4a1KQAKWUJshkk1WdTUnhCLfmYgPUTqPQmpump"
+    GROK: "DH5GSYRMjfoopoAYVoZRzPhcBvNie5fcYh2mKrSHpump"
+    SXSN: "AVdMZALXMEQt89VZdgNUdMHM6dY7nFdCCj2QFjG3pump"
+    FLO: "7mgPx45kYkLqDYBL6urorFiuGguWW5qRfdZC7wrEpump"
+    PIG: "qcWHAVZNhXoGe2TrVCr1qodskp8WYChzFpSaFsBqtra"
+    GYM: "HbAM7eKXrwJvdB3fbrSj6kMfCfYmGTfrGK491841pump"
+    PIXEL2: "AKkQyKwUxxJnuugwnZBm13KPhENiphxV5QMP2uyJpump"
+    CAT: "8Zp7E24JmnPFmr7ooyNLR2Hxtfw6pv1wm4p1RoGtpump"
+    PUMPKIN: "BLTuRWGPgnkfA9CHMv38ucfnzGxeoYLhVY1fijqupump"
+    TACO: "FA8Ay4U6CR5oSpziux3zFVdUWSbERhDuc6LzDznXpump"
+    WOJAK: "7npCzAdvitk7gsUQ47vY12r9Av8oUAyeGEHvefL7pump"
+    MUSEAI: "739PUWPzdfAFS7vN1s2bxzVVSXp4smxmZZW3dadEpump"
+    8BIT: "4jiCKkAbmVL8iJixqVue6jcoM12H9yq3iSvFineHpump"
+    BITFOOTS: "J6Yf3tRj9qAJtYCDHfKGKk5yFaQKcXq6UTn4Adgvpump"
+    CAT2: "CiijdqvgUD3MNXzoobXNDVd9DSSeMa7Mt7AeLGdXpump"
+    LTC: "BXL1KsCbdADjcMbwJidLEdNrFryH9j1pwMELNZGcpump"
+    BITS: "HRwBrps5TQm6UYzaaCuHZxhjjqQ8yKMbbYmqNEsmdRov"
+    LONE: "n5WuHB9eaPw9L152ZA53Rz9gNJuhBYGLhKcdiknpump"
+    PIXEL3: "BWAXYSkGRjs8fuvAuGEPhLZnPvxn3LhaDC181c2xpump"
+    ROBIN: "H25vEwunWbzwhG92FxHojqGax8Ub9oWdS6vcAgVqpump"
+    WOJAK2: "ooEFsr6w6Vd3awoTVDttHVTeja3YPLUt5vxTFuepump"
+    XMRPAD: "FN2vUJ1MXxw9xV4RRp25nyfoT65f3VZhSq9ohEWvjtGL"
+    DGEN7ERMTP: "7ERMtpes4To82bDQNqi9BABf2o3uDXQS3jK7woTxpump"
+    JEANSEAL: "C9hzfBgooQuL8iFvkK8SSi5Qf947uV2HuM4xXnkLpump"
+    STOCKCAT: "6p9APJBzco7T6yZEs5EfpM2T15YJjHRuyS5hZvGXpump"
+    DGENHUS3BZ: "HuS3BZnpzqU3WDHj1m4sPw43xVu74SAcxyq2x2abpump"
+    ELECTROCATED: "3QJQZJd6AS7SCZc7Tw749YDtG8BC5keua8ao8BuKpump"
+    FOMO: "A55bDitM2zxW2YdZNwzhGiAVUFEb88jShuY1CTSpump"
+    KITTYLICK: "2bVfEc3rcev9C3eaNmdvs9MQ52H1wWr3MBSjUUhjMGNR"
+    METAMASK: "AQ4G2mk3VJQbqp1HFTzYpTZzmfvBUbpMTG4j2zxpump"
+    ROBINHOOD: "HA2z9dcbpq1eicyW3n2VpyKpqPkDcT9cLmWachjkHRpf"
+    GTAIV: "sWXQgq4ktgUEwqEf9wi2Vq7auEGXxrgj9azmrXHpump"
+    DGEN7UJ4XH: "7uj4xHwYYkFuRoxE32ipD7JCdqbFKJmvXgf76H2pump"
+    CHICK: "34izpwCZcRwaMULTjBNdheEKm7qV4kAhUc5Q18Jyby5M"
+    COWF: "FB6gcsYM4oK5X8TBi3A8xx9Pd5Y4ndRsW21Rk93Rpump"
+    ONDO: "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3"
+    DSYNC: "0xf94e7d0710709388bce3161c32b4eea56d3f91cc"
+    AURORA: "0xaaaaaa20d9e0e2461697782ef11675f668207961"
+    LSK: "0x6033f7f88332b8db6ad452b7c6d5bb643990ae3f"
+    QNT: "0x4a220e6096b25eadb88358cb44068a3248254675"
+    VIBE: "0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7"
+    B3: "0xb3b32f9f8827d4634fe7d973fa1034ec9fddb3b3"
+    CONDO: "0xfe99b2fe66c7725ce30730010a864740e7c39b26"
+    GITLAWB: "0x5f980dcfc4c0fa3911554cf5ab288ed0eb13dba3"
+    DOT: "0x23a2847d772803f9efc64b4277b782b06296fe51"
+    BSTONK: "0x0f61edbfe6cd86024c0f210c0695b08df55fdfc9"
+    FET: "0xaea46a60368a7bd060eec7df8cba43b7ef41ad85"
+    EDGE: "0xed6e000def95780fb89734c07ee2ce9f6dcaf110"
+    PHA: "0x6c5ba91642f10282b576d91922ae6448c9d52f4e"
+    STONKEX: "0x5ab000ff9b9ffe0349ce5ffa5fd86f217c3680f5"
+    THICC: "DvchhPfxne9ph26iyx3CW9L7jrNefv2eFzbNtraEpump"
+    MANDATE: "8DNmbQY84LLVZn8CLmW2Hx7moDvdbamnDuL9owwzpump"
+    FOMIE: "3v8xYtpM26ZgXfvAKQ6q6qU2mGbciEZ5pqJS3rHqpump"
+    DEGENBORN: "dTy7BbHMP57nTtTiugCnuWAi7GPU7pMa5QmN3mmpump"
+    DRAFT: "FZksxUgidz2Qubd18gN2jv1WcPwRQcboQo33GZkXpump"
+    MICKIEY: "3Xp9ZfBm4h1agLmZGQuXHwHcxPETFdX2FXGXD1eDsjWn"
+    GRAILS: "Nr8nxhyniXk4hgwKAyKmdVvh1VRfJWTDokQtGw7pump"
+    KITTY: "2PqiuSJhTCZb8w4HATqcnpWig2PddPnhge6qxnaopump"
+    DOGE: "UpjvL6RaQb8nhne6TFFmCEQrvgZLxc7qbQ1JDHxpump"
+    DOGE2: "C8VJNjALRLQp8kQyeqwQ6Gy9CyLJpxVdYJV6r5pxpump"
+    PAPOI: "DFx7Rww2Njg4P4Bv3SUHaN5pkFbB4zR23nGthjSBpump"
+    DIHVIDENDS: "GpTtQsyKpukVSpAHL4NhKzF88rkLrRHKMnaiwjuLpump"
+    TRUMP: "DmQDfFpbKHna4MgtsZgBQYmyMSNJjvLAj6XjduqRpump"
+    MINI: "ELkLdAgwgr6e9XsQHhE584Jz1NgByqgYszwXsngopump"
+    KINTARO: "4NXwszU9Rx6DNGwFh621VoLRgxsvevHAdQXRGR5Vpump"
+    GOLIT: "Ao14Mr5HyY7Wkn3q1QcetLYygkvfDxVWpruGzdTypump"
+    SINGLE: "FNYtj9UT5jgf7jMFrLaM6PNumKrN6ca7rJAyAhkpump"
+    TOM: "9ZGnJ4erx7RzLKEdNoJjLjyYXkjgXnRcPYvvT3eJpump"
+    PUTE: "3vYRNtJST8dq7PFz6iwvBANYaWXvgK6hFSFUfCx3kdn2"
+    SHIT: "2ha56d34UFWEDvGpYje7FmnMYmzHKoy3MPxA9wwdpump"
+    CREAM: "Do4VN39zVA66MFEKUTfE2TDjAMuZ4yNHmyJHWwYhVvi9"
+    DRB: "0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2"
+    AROS: "V4LCKBJdSn4iqd8rew4XNcppZbXGmVXmbSdtijXpump"
+    FRIC: "12W9rBZafdn4Jb2YSLGp8Pn96zbppBsMD5qw29Rapump"
+    AERO: "0x940181a94a35a4569e4529a3cdfb74e38fd98631"
+    OFFWORLD: "GT5FKgCGWgDdmwNNAEWdG91qgMZ2UctBYb7TeNYCmoon"
+    SITTINGDOG: "EySAZqTACaRmQHSJkUXc9wdZXybsZKht38fxvdePpump"
+    RUNPEPE: "uTVvanHuHyS1iSf42YygB9bA87WcXVc5RKcisdbpump"
+    SPONGIEZ: "62BYSfbsTiG1zd7vBcY1ubpiZGvPAbTuvSpwg4WYkdei"
+    AAUT: "56aJJAoXnWstEGA6zx6k6mrgdd6hVMN99sfwUtQfrNW3"
+    JPKK: "GqBXTstbKvugqJiazDj6QgDibBgDc5XULXoQ4zxkpump"
+    0XPAYMENT: "GmjxzzngCBtF8uZwBkH2rRxAnxqrvvqSCvs6W5Cpump"
+    CYBERSHAMA: "4tuS2LjaoJs8KKshKesARJuZcexSp244jMwdykHWeauR"
+    TOSV: "5MYP5twDbjocd3tQ7xmLgDQ6BnxsxFwLmoLabYp1zQH2"
+    MEME: "ABNbjwfaiDLfomrLH21RzscZ8rnNkrDEHKfSC9vY7XZ6"
+    MEMECARD: "HwB2Pk9n4gPcxbYA6AxwhaxBK5rDHLGmP3Djvh9opump"
+    ENA: "0x57e114b691db790c35207b2e685d4a43181e6061"
+    A16Z: "92yhDA6VdjbKBx4My5SmXJdZqQmkzhytZY2S1BqyHmNs"
+    CCRU: "36j719PhVNA9Pf27UnWs9y77iHVN9Q9c9LmPGz6V97h4"
+    GTAVI: "8ncS5CY9sL2tpDuZC3y1nGs9D6q3kpeso2AkeiZsiXzG"
+    URMOM: "6XhrFtGYKweKsEMmvnwZpj7V95EefFAZgbEopqTfpump"
+    QUOTE: "E55rCLrmQy7P3fygLxanefKJALLUxvi1N11BuUbWpump"
+    FOMOBANANA: "2TqjTjURqnnqWMtouKMRnRomVSFuFYSCZMDHBigipump"
+    SPONGIES: "3uweEXZMXJTVFT6Gv9e2LPmMdCe6FQgJwY31TK3RHERo"
+    DDOSCAT: "EC9CztYxdZ8jTsa8fmwuDFddCz1yunUddcN8Exk3pump"
+    FIZZ: "EKg3cp5yRuQbx3BCy7c2wiXCWbe9L3RTwpnRQrgfpump"
+    PWEASE: "8TP6xYfjHZPeBAuVtkQXonUjnXjdJuEktHFR2sGcpump"
+    WIFPAID: "J3XreXPxhdQENpToUihgzrggF4kr9ofnUvjgaNcWpump"
+    GEMI: "GYyB82frdo92L6dLkwynMHy4htcM4U3PXVYG2Uk6pump"
+    CLASHPAD: "HmhNrQQvkaApMUww36NQGndCxf1TVV8pSbwuEqsRpump"
+    NEWGUY: "3BLSsAu7aNkF24xHN2hju95QpHJKPpfmyD5AHXnUwikM"
+    GITHUB: "rpg6fvPwpfwRVGJXcV73fnZigyKAgmRCSikwYtppump"
+    GAZETTE: "2rwARchJsUweL8ZAqGiEUMVqn7PVBsqM5r1geNFQpump"
+    BIOACC: "2VbTPXqtHLmB7keTjbS6UxqWtdZB8qXXv4GFCERUhEUR"
+    BIRDS: "5k65PgqkazbaCCMekpxdutv9tGuoVY7wXg2mwdbXpump"
+    GATOR: "BtbkWPJLTMsvhWWxnjRKYzKf1FjAdY499sVG8NHHgPnn"
+    GUMMYCAT: "6NdUogYLbXV8KYKC8JygnCQJoTNU5DFxhfakaUZopump"
+    ANTITHESIS: "Gu8jPqcm2K2yZdcWh1spKL27ssSNfeE6nbsb16T5qwC4"
+    TOE: "F3C2t4hXyeGXsUSVQ2zJ5fbD2tFrjQygZosCS1cHRC5J"
+    DGENTRGAFW: "tRGAfWstzCEVTE9zS4sVToUkPVNEvWb4MmM2Zp5pump"
+    HYDX: "0x00000e7efa313f4e11bfff432471ed9423ac6b30"
+    ONEPIECE: "CwRtN7KBDkdXURWS71ymoSEEUDLtmjSw2YEZjhbPpump"
+    ZVM: "p6zDRmZU1iwe5bhEv7gCfp7bRZeqhyHvp3HfUVSpump"
+    ZCAT: "9EPu1RVyPri8Dpo2W6VJg8moQ6dy4KVKWYGxTzWopump"
+    IRAN: "VCoSApr7k3r7F4L654TFkmnQqcYDVPcfGmGALeypump"
+    ELONG: "5hDCwHfkYirUpz5pD6JhSkEYMT7EyPgLkixVmCFUpump"
+    FIRM: "9M374yVvrcinzMNiACjzoEaZ7e1dFMniy5n9Zcnzpump"
+    HIVE: "3zYnvzjcVnAqTn4hz4DeqQnKQA5LDBVLcJR8urcopump"
+    DGENF8QNED: "F8QnedhWuoN1PiVA5W2UACNNwqFHrWS6ibfLVzu5pump"
+    GNX: "8fSEn8vkimANmL5oF8GPiBcfCRKBJig8zjFZobaNpump"
+    WUKONGBM: "3NvnWC7VenYdMW2wJwWbtH5WkTA7T7yfu4biQMEwvvN1"
+    USEGROK: "AQU6fgVLHMSSZbXBkcTcnwtbBkgj1ZSgUwD2csiHpump"
+    GRUMPYGRAN: "HwvXANFzsZZgH6Eqatke8K6uUpY3cRJppxjh4w8xpump"
+    IRAN2: "hpteadyzL2ucrA8bNwawHmCa66G944vZEujgDSupump"
+    FRANKLIN: "8WQivj8qkLbec8KkENCa5EZJi73obxLa4Hu3AX35pump"
+    BEAST: "bZUZXoioB1XTHzGj2SMjkbJv24HgWY6F8PHW4LGpump"
+    FLETCHER: "JAccgVwonRw28jZ3fHdgwtyAfKJRPd5qMqaVP2xipump"
+    HUNTBODEN: "xtqgWqv153N5hi6q9Zg8ERhd3ugdd945ifvKZ7jpump"
+    TROLLOWEEN: "ZrQdfsbm4XVBXMBr8V9Qxvy4Jkt36b5K9iEZmR9pump"
+    CATSTR: "BvnqdYwuFrvi9ds63EtwQLYME89ikJkULnJPAd83pump"
+    XMRPAD2: "CeVVQMZx8QcVNZ5PJ4YgF8Sz4FqfudCKABMAYN3RGxmr"
+    XVAULT: "Cxsg5L8SpnesZQZjtjKieyCHLBEXpLPNzFX9aoj9pump"
+    INSTA: "6UhUkSBc9RBB9gVJcjCWtcQv4t771rQF7bdn2qK7pump"
+    BUNS: "36ef5aQyrEFRDMyRk3fBdcvDPHNjARi5bDG9ryPoWRWX"
+    TOKENIZE: "C1Ei7vhs9rutmaNApjv574giHLsMEd6fEjZKQK5pump"
+    STOCKLING: "8Qw32vmvAoAdR3pkeTrWDq2Hb5CXUYoiFC1a2nXLvTgL"
+    MRBEAST: "bH1cFe7DpC6L9ixusjCMPHjnd8K2t4E57dtKM6kpump"
+    BOB: "3ivtY2taa2VqK4VhLEm9dNaZT9Uq4nAiCFn8yFgVpump"
+    BARRON: "Q3Y5F1LfpLvD72CyJcwg7wE6zdPGxWNvFnGfNfcpump"
+    AROS2: "RL3SBz5KyVKZEexB7bf45GHMZZDMtAzNX6U8KCkpump"
+    HOOD: "7d4fiGztU3ZFy1No11TWuyMo9QbQU9UzUCVyGo1pump"
+    KACC: "BXxiivUY6xPGmAMjTybeaPk4uqsdWLVVtyLKcczMpump"
+    BEZEL: "4RLhqc1jfpMLhtALMeUeVeJ5vySyL6eQca4cBjgCpump"
+    MRBEAST2: "b84adVT5D7JkNHPFHF8yLxGUUQVHQPTZdEnErrHpump"
+    SLOPCANNON: "2RXpwQ7zUxC5h58ayi8kp3jpGazZoMXUNgYMy1on5f8k"
+    FIM: "FzjbSUAtxKGEgBSD88WZf4J5pppsWJuZgpm8CcdL1pP5"
+    KIRK: "yTyF1G9CSaRS3PYzWwbMHpGXJ7FDeQJTC7NkeP1pump"
+    FIM2: "F3qyW7fB1K6yTpbQVCK4CqYrgHjnXYZ8ou3gQP6Kw8cN"
+    HOOD2: "EDYyzCvFnhgxd1DrGQ353QejWWBFfkLPgXDtCE2pump"
+    SEND: "0x47accd13264d8f954105256faac8376ce6a55999"
+    DGENJGHJBT: "jGhJBTJAj2cRXQYHM2ZaogDXNMjFYSMA4LLcVJ3pump"
+    SHFL: "0x8881562783028f5c1bcb985d2283d5e170d88888"
+    LEVEDOG: "GJKZgTVHLGD7d31fDEkfbT4qgyThTREKHazwS6G4pump"
+    WACC: "SM9qocPhNbRMBwDUUTsHn5RdAB5YnJ2EcDwech4e2Ao"
+    COPYCAT: "8X8uT6CaWKSGaMEyWJysWfi5vb83wAhsRFggFaTYpump"
+    PHI: "zVbJ3eRjhRbvKWAxP8xrXZAeAcSqk3vtTjCzzVAAphi"
+    STRAK: "33fV9aqrjTaWZeTYg958ELPnxqK5PGLSHBsnJZaYpump"
+    VISCACHA: "BKpPmVjnHmnRWUxVDgsFM8qfMDSG9fKPEDA9YRh1KMEs"
+    BASKET: "AvFcZhtaPMY3D8oVNrCTmvc8vQbBFV6QC36Kc9dFpump"
+    GTA6COIN: "xtPQUDjXe3idjizfPchzX5AkX4s5W7iYmxop69Cpump"
+    TRELLIS: "DQEFRGGfPFVSQsGDD6xN5KgUyRLu7veqrbac5SdLpump"
+    DIO: "FsSCJrnr8exqxoayutZA71wK1efyJwNoHKjY8nHvpump"
+    LOADPAD: "DRnjBUkToxt6x2xKFr1UPb1Pt6VAhWienpokYmjwpump"
+    MCAP: "2y2o99j8LLpWfRpBwmSLZjp6kExWPEC9kRTPtdHcpump"
+    NEARLY10: "8KENgS8KatFS8kCBPPVZqRBKDAAFGX8A35SDxLLPpump"
+    PANDA: "4aMrifJyiQs9dZc2iRDWNEftyUMKy6igbtnCBYb1pump"
+    SICAT: "9pMXEbTjQ5HHiYifGbNBwkMkrQxGyhuSmB8ndKNXpump"
+    TOONPAD: "Hjk7MTpVVUg1jKNC2cYSgPZ1SoCUwKbWivze5Je1pump"
+    SLOTVINE: "5nZQKW5t1a1yJYM5fCgPSZU4oQGoYb94siet9Chepump"
+    SNOWMOON: "0xbb399b4a6557d44d58c626bce5346ad2f8fe9844"
+    CLAUDE: "5pM2dWD2qp28ALYDb7ZCi46VwgrcZeoArJyCJaWpump"
+    COMMISH: "75QnHr7w1bHXSUJWmk67TgTQNRkRHCi3Fei9iLoopump"
+    STARDIH: "GdjF8iV7BncBvvDihvcWpuaNFZ72VgdFvd7AzEcypump"
+    STANLEY: "gx1ryvfjT8AMhWx71iNHhgTLbHuNYi5dh6YT7v5pump"
+    MAGACOIN: "yuvRuLaGS2geJTWmRfLv8fJzTd9Av4uiEdaCoRTpump"
+    LEFT: "8TmJyjBd2ZtQRA2i2By4enMxYKb66P2zTunhKgbkpump"
+    YEE: "0x9ac9468e7e3e1d194080827226b45d0b892c77fd"
+    CODMW4: "D2SvPS62muUEfCSbgY1kxUAJn7Srrx6QQHZ6hE3uyYDv"
+    TAZER: "cn6q8ZgpEuvSXowwc1jVgNNb9TZTZisHEpBy6CRpump"
+    BLAST: "D4GkdYbVphmZEPr24kGRjZ3S6v4zkJEe4oYnh7ZTpump"
+    HYPE: "2fL2ZTDH2qowXRX5mwHWskuJ2hEY7P7i4i91AvKQpump"
+    MESUB: "BcyEzKVBXkPAX6651VV2GkuVyAUS7kVSwTPaamGrpump"
+    FROINKCAT: "8VxaJHWP9NGYVDeYexGXXbmpmoiVXNvspjqtkbZUpump"
+    LOADPAD2: "E5k7hL7E6dbpu6djeZ9w5xAvrYJc9gbYUA5eXZjXpump"
+    CLONES: "4akevTN2EaqUKDT2jhcRH4oRk5cppwRdaE5MGoT8pump"
+    ZTHERO: "APVraJkDbqsWwzHYi9fT5EWu11LXKg3YRFnzxNdmpump"
+    PAYDAY: "BQKQeoxCEwyn4kPyEpJ88NqBaEELG6fLKufRCsvMpump"
+    INDX: "32VF5HQ4iMuwCBMFUy37JMdNjHK4qX56myRpufz5pump"
+    SPONGEBOB: "7Nv3GZ6hyhHkFcMbNza6MXM8aqkjdrDsSKopMFDKT3bc"
+    RESID: "BMdP3GKHPiHdf947eD8JJZv7k2s8TmmJPFjMSeYNpump"
+    CATCLONES: "GKokAG4oSBvTjPpKYyktPm5SgdhQ5Y4zJ3AnUEFpump"
+    OFFICE: "DMVGBQ22T1VWDBpMaLSRTpE859tEvEp1x52Czxvipump"
+    SPIKE: "0xb20000000000000000000070f6c1a66d7c1e4d01"
+    BOTCHAIN: "DjFCHHoJfNGkLZRs6D49CCsneui1vwym5NX8vAiepump"
+    LOOMER: "EokLxPfCyag59fauedgM2nSKtyMaRJNRbTSYzLzupump"
+    SOCIAL: "H2t4HC4bG6Docx1TLwesb7r9Yx4i9QT7wYi7kSpqpump"
+    MEMO: "BXornXUwWLzR28fKyWwtKJ9bWTc6QqZ8ghrMeRFBpump"
+    NFLSZN: "P5RXfeESMR2UxJVV869aFtnFc38pQ32dXEuv6nRpump"
+    RP: "MewDQXaaCQDrmi2qD3pYXTxMdbgL37eNu2oYok3pump"
+    RENAISSANCE: "62UxM6G7RoAfth4PUqFZtCJjBpQDAGb515sFrEYupump"
+    BOAR: "0x0cbf291ba052174879d90bf781df1a5f2bc5bb07"
+    BER: "3sJLXbRoBgVgeDnCCfmdSZuJQRtuyPRsJmMTCZumWH9Y"
+    TIBBIR: "0xa4a2e2ca3fbfe21aed83471d28b6f65a233c6e00"
+    NEURAL: "0x32b053f2cba79f80ada5078cb6b305da92bde6e1"
+    KOD: "UtiuqS4JGbnNPnT9T8Pu6QVRYsWDp4vh5pVGBEppump"
+    DGEN5SXXKV: "5SxXkvoY2J4aRLHWpV6VP1gUSVmXrbUE7MYvWaucpump"
+    YIELDCAT: "BsDaBRkQBucnNgZfagHnscPaUosoBbznXtqM7qMDpump"
+    TOAD: "5BMbcG1eD5zwQeED2BdUARqYqGL5fgv5DhRtAUHKpump"
+    TREECOIN: "3SATNvytVxJdYVwBSeWNehk41bbA7M8TQJZDmNfqpump"
+    AP: "0x8602b2fd8d105a56d3152e936e66b1d414142148"
+    XDP: "0x07b3d902783c3c12b077508c3b5c00113d1291d0"
+    HARVARD: "BA65sETrTge8pxszK5wesXUTZLcNpuFXLkc96iVXpump"
+    GAVEL: "8PAagQyXC52eJKKfkVGJBLJhqQa6zion39mQWvBppump"
+    STONKPILE: "2PH3K1ogeechCn27EtjENJsvfTrMpr8mDCQ3NJX7pump"
+    COMMISH2: "Dyevwo6wxkfrwuPNTTPtquCjZT4hUV4Kn8u2y4Y7pump"
+    NOKO: "J8M7sFrG7tXSvC89auXMxKmHaWJ5kkZ1HLmMh9aDpump"
+    RAY: "eUH3QXgAuUFpjr5wCLtSUHhYvTrtxXsLCmF9Mh7pump"
+    STOCKER: "0x75e2fc69ff2ac12af65ba7d321bbf4f878c535d2"
+    ZC: "0x4e67db19044549ff420860834c91b45bad298722"
+    STANLY: "6DEGsMwyB6xu7MHtW8vQmL6hVDXLfVrJBoChEyHpump"
+    FOMO2: "MzW4BwWa3ywrTnH3N5u9kRwsBi5DJhKgDLeSEjLpump"
+    NASA: "12agxYU8uMhz8qD8SHTrE9YLPLx789mvtV4X2Ntapump"
+    XSI: "8mnDxKCJUS59RzvesoYEk2ivtVhn5mBS2tmKj32ppump"
+    GM: "B27T94z5ain8CMcyE2M67MpNbVZKM1U1wGHFAiLcpump"
+    XENEURO: "5hGpv7aKs1h24QbGAGwyZ16CZ7m6xeZw4FpruzDMpump"
+    JELLY: "GmgxttyiV9vqBVYwYv6Y2Xfn8mE9vMo32J8pDkdpump"
+    SI: "2daiomkVVr5GJV6jj5r3n5BUChLHGwqP6hr53VQbpump"
+    FINGER: "DZ6RSpHaBaKBowHgaRvBCVeY7aEDBTRqVd23HUTbpump"
+    FUSE: "0x126f5ece91d971f8ad62fa4fc1054456b8bd1111"
+    APE: "AX56Rh6wbykQsPHtXYLiCWR1KmDbmjySdbxgGAjQpump"
+    STOCK: "2d79yirWWZmzf249y7B4DMvgaSb7jgrCxrwTcweFpump"
+    PARASITE: "3kmygWKZBkCYrgZHKfiuB9UFKTcDLTFFsKo3BWpmpump"
+    SIUUU: "6VbdSMouZy6VpWxJtDxMWPuNZJoiP97Q2Qv42azKBSJs"
+    ZRO: "0x6985884c4392d348587b19cb9eaaf157f13271cd"
+    SI2: "E4XPrQXwyW8BfmmE6PxiVWNDEdVRCE32Eq6fRZdcpump"
+    DOTPAD: "3FYAXQtJwqw7WAuLD65QZwdcWMRvHyzCGds8G6x7pump"
+    BMW: "CdN3UPTGSL8WNCffpRJ5eujYy8LK4yZoj6zpTW1Cpump"
+    POTUS: "7P6r9wDYiRT8escThJBpBDUgVDEVjVcnAX6ofqaCpump"
+    MCDONALDS: "BRJ4Tgjh95yhL5bCa5oUz3vcuh1RZmwkHB5zaQieCht6"
+    BITCOINSIGUY: "3pBhe6rPogRcPY68ybYiwN1NZCAFccFPDCLmLA3xpump"
+    COIN: "9GtBRgzUybm5GLk7ZGjpG88aVpZcvLuTdbwNkRraTK7H"
+    AIRPAD: "6ZG6fMHaE7NpubJr16G8nFLBg91rH5kU5SVpqUmQpump"
+    EDEL: "0xfb31f85a8367210b2e4ed2360d2da9dc2d2ccc95"
+    DOTTY: "iCL76gC8PsRNzesAhso8y2oP42L9FerCufHac9Wpump"
+    WICK: "CJRymwqaQgjgLVoRNeLM2se5yY2rJCQuoCmdpwrdpump"
+    DADDY: "BBrfx4LNN4zhAvpFi2xNyqNVYsFRxXttrLAToSn1pump"
+    SIS: "AqYdSQ6oFq8HjLoFkvHW6kYcRM1p94Q1FcvGFxDfpump"
+    RAYZE: "DG295PR2jjyHoAb1gkWbejror5CBVFp7g89827SKpump"
+    JELLY2: "9iGZnbmugkGby36fUK7KGKH1GYn4y7rsNtBK213Ypump"
+    PINK: "AVBN6kXdaw27ySuvMevKYzNTL8d39b7sGQFDCmsvpump"
+    SWEAT: "0xb4b9dc1c77bdbb135ea907fd5a08094d98883a35"
+    PUSH: "5Heq1xjFjuNBuAEAEhbUChgM2Q6AaTTNmVEDVqEpump"
+    TRUMP2: "DxgJTLsgNVMaZBpgPzKBBBLBSdSAZzxyAeAfboUApump"
+    BAGROOM: "G8a6tsFWrXKY21xkY58VnjAbQWDJwCbmQ39B9ALApump"
+    RAIL: "0xe76c6c83af64e4c60245d8c7de953df673a7a33d"
+    MERIDIAN: "GjrhXcr8YzUZBbu5rifdqM5CPBS4LFJveq3ZiY2u3g5G"
+    BRAINWORM: "Hzdthevb5nefLEpwQqwWWedx2gfpf4m6MiCyFghwpump"
+    AMC: "11mwXYNHsK5orsvHokxsYgRbpo145k6SbXTYYkYpump"
+    SA: "9Ss1fyCM32dvCJJP3R4TQj5Wgx27A4jcbcaGWJAcpump"
+    HERMS: "C6WC7y8kPcE747eiHfQTfimiSebr5i9jrN66fBKnCk9h"
+    SB: "4zooztpfX7oojCcoA4jA7cAsxR6p6AkFCyZXTcC9pump"
+    DGENF7FFFJ: "F7FFFjA1c9NxxNasgWpZt3Rbu6nxYdbkoZVSGRE2dvQm"
+    DICKBUTT: "HQvv6EZvnq2nq59rVTHoY5gj8cXQrk1cjEyiYGDapump"
+    CLOSEDAI: "6JoSkBTZEeRV19D7wvTbp87hsen8dMyzEh5x22MBHPLp"
+    TESTCAT: "GHvTjrwPFfaoVyo5JBucpu3zAoJwVrfceAbgwK6kpump"
+    TECH: "HELSnnPfqcRx3nn1sxThrHzYftXKvDJbDYrJcjt8pump"
+    POD: "0xed664536023d8e4b1640c394777d34abaff1df8f"
+    GTA6COIN2: "9E95LAVs5t61ooGh87bYLuHpZqUCKNuoubYew76pump"
+    ARX: "3xas9JZy5GP16YSVbq79txxnxDFZznA3TCurrJmGpump"
+    DIT: "8XeBzEqjBpgZWCdY5WqNiN8j3qbx5WyojSAGTFHTvfui"
+    GTC: "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f"
+    ROBINHOOD2: "984DTYKe5p6TReEU6hoe16Jd3MHw9ouBvyemRTAjzY3K"
+    WALLET: "0x88800092ff476844f74dc2fc427974bbee2794ae"
+    FUGU: "9HAcGAadLK2CMLT6KbafWseur5WqPWpCfzTJsHRqYxh3"
+    INU: "GBJUUm9VZ8a2gjJoKaw2tmqgxxSP79DSCXFQJCiopump"
+    EAGLE: "CMpFjLWqti5bnPUUAFeDRNjCixeygbWDcx7oZfXCpump"
+    AGL: "0x63401cdd577478f9389a1683e866a937f072d1c2"
+    BMW2: "tqQmh9h4VXzjgqqyZvCZndev2qJJ1bsRq1MaS4Dpump"
+    BACK: "Aj1k8boFvCrFCw3SXn4rm4tdVCpSkpeNDC9DgzTRpump"
+    PUMPCAT: "5krNQZMsiM7qT9KhzettHKEamQDUxaPEP8jCpjdQpump"
+    NIVI: "5R1XNfbLqGDe7vzrNLKMqM7zyWmd2Savrt3QfGyGpump"
+    MONEYSAVE: "8jvhc8BRF9zjK8ZAwYCA1FXpS5AWhodmKLAMPXJPpump"
+    GTAVI2: "HYicYXo2TTEnk1njGRTkkrGiqSSYMw1iuiTKksykeUPm"
+    ELON: "WYUfHjkR6hs2Piq8dLafHEmrMaJGx4WEvxoPeiupump"
+    BARRON2: "3wSzgP5yvef2tExrNcmdEUXX9QzHmGsNzQuu27hN57iz"
+    LFI: "0x3722264ab15a1dfce5a5af89e6547f7949a8aba3"
+    MASK: "HuAXPyDWDaMYFKuwQHpqL1oPnj93zdzWmtvFGzCeCUa7"
+    VELVET: "0xbf927b841994731c573bdf09ceb0c6b0aa887cdd"
+    GENIUS: "YbYhD93eSsgyCbMEUBWHpUc5wNjUbWe7VWQTvdPpump"
+    SPEED: "639PsaVkMt3f7Bad6Lv1TZva2ymabhb8w8obiw1HUtPq"
+    HOTBOT: "8nnaeWCw8mUypcGAgbmSuzAT85uWx4UN12adDrMhXrGF"
+    ZUCKAI: "B6RBvqnGhgiEdCQFsersjHXHSxchGX3Qh3iZEW1umJ3p"
+    FWA: "0xa0df17b5ac76ababa36e1450e2cbcd18a620c845"
+    SOCKET: "XLBLxbY1Mr7aadnqAbmqSBXLEyUdjvUXtXCnz8Mpump"
+    PUZZLE: "NM4kZ1wiEPNN4URm1XcoAWmQfVYARRPkyLF3Rx6pump"
+    GAKU: "GgzPugrpK6A2LmQtq4vD3oLRJ8FFxvYdexxTbHvdpump"
+    SUPER: "0xe53ec727dbdeb9e2d5456c3be40cff031ab40a55"
+    GLOW: "3DNCuaxAewErjfvnhmVkyDfo21nMMx6mSUBgiK4mpump"
+    SS: "GvMX4RQJT5qQ6dyMc7cfmtoJjE2PfGdjhnJzR295pump"
+    IXS: "0x73d7c860998ca3c01ce8c808f5577d94d545d1b4"
+    FILLED: "8dBnKHwNYH3hz2fFTJczVwzBTpJFAMtc53k3uA4zpump"
+    ELON2: "rNSSAF3hnhNhNfcawDKeWCKqbHvMhxskxWqo1WVpump"
+    DOGS: "8MunhcSG3UHTqxUgJoVEBPMboSyMZ3zuuoGg65Etpump"
+    RATSPEAK: "0xf1e9baa65d418a9025e1851dd2d37f1ad208bba3"
+    POISE: "61Hf6GLdvrtHv7U74NwGP4b1GUjTdQcbsHYyyrJHpump"
+    ZAMA: "0xa12cc123ba206d4031d1c7f6223d1c2ec249f4f3"
+    ABU: "6hTLdzZaaCjmqtn7RtaEMQsCbXT5Pg8q76tRViEGpump"
+    GS: "EKJQb4Te8jk7BX4fj7P7nNzAyk3LXAQDUy5m6NkvbsH6"
+    XCHANGE: "GPvjzJ91XoX4jTv3seyouTvZzq9YXSXjrrp6AJZLpump"
+    STARBUCKS: "BtpUk4oCL372vqYdrLf92fQPMaassaMdLNcQ8bN462jt"
+    TREASURY: "4gqjyWbKM7TRhvxaaztZrBfdcediaQ8Rt5rgJ9DWpump"
+    ATH: "0xbe0ed4138121ecfc5c0e56b40517da27e6c5226b"
+    BASEPAD: "0xaeadc7084bc3c482921a8ad7eadc65f70e06106d"
+    AEON: "0xbf8e8f0e8866a7052f948c16508644347c57aba3"
+    MODERTS: "DLFct6nHYFiWEUHGvE8PozFrRWEmmNM3nUrtcCyPpump"
+    SURE: "285zor2vwNYzURQTmyLqxhYAabwfDP4MpvYJz5tFpump"
+    VERIDIA: "0x255cf35cc469ffa9b5c74a721e899380834e90cf"
+    HAALAND: "QyJEuuWf6SGfd3DBU3r91TLMoH7BiCaFVU8ABkipump"
+    DGENEKB3GK: "Ekb3gk4s815UV6k8pNqhJsjDYyd4yNfmjkTHzas4pump"
+    BONERPILLS: "2G2xxfnaSLBjpjg7uGpTeNLxnBkjh3fRQRL3zZASpump"
+    SENTLY: "EbWbvXDmAFoKidDzEbTpyHixkLybQKmaEE7UzFLxpump"
+    KNIGHTCAT: "3Dgwn5E7H5a8k6iGrz3qirkaJqUaJrKHEZ2xPcLRpump"
+    HUMAN: "2w2K6Yxc5VqTGcrnrkGWETHsjjGEZ83T8TCYwmTBpump"
+    JESTY: "2qf4ScJ1wyEsXYjwE1GM3E4fFbSiqTJawzfL633Vpump"
+    XMAN: "8vDuxcypxP1W7QzDs537zUqnLbxPbyD6G1i7q49Vpump"
+    ELONHOTDOG: "AyNwpWDTd7uuVttjoRkJkt1aJPbZFXtQ6nwotjc6NVDi"
+    KKK: "6NX2tVJBvAzNeN3bQK295KdUGMjPWP3oKqwCoW9Zpump"
+    NIKE: "9zgW4hxrZPnKBTVie9v3bn2qwJy3duZPn3JtREhodnKh"
+    DGEN2Y8G9C: "2Y8g9Cmf8h4TUEd4VTRUjzd8xwmzw6ZNb3jDnwGzpump"
+    AGENTCAT: "CZJfrAmMs5Cz4H22PWzfqTJu5FkP7Q2Vvx1oPVL9pump"
+    GTA6COIN3: "D41TYrsuAMQyNiFZqGpBN99yaXTbsX9GqyJEuVB19i24"
+    KURA: "C4ru2YKwoa2FCKRQzUoKzzD4jxCtw8sP4WVVo1dRpump"
+    ELON3: "5R9f77WANqCqmMFd27yyqss87UgMXcHu4WTSCWnB8pju"
+    FOMOBURN: "EvtLVetCz56TnooZavQgthVk6VAKDkKxrwdrVLxpump"
+    DREADBORN: "AXQUK2RqUU4ThiMqG7ZAFsb4B2wc1hHJzawH39x4pump"
+    76ERS: "CLs6ktih5hW1521wVBbhjhT2PDYroDYKYUmRSxsNpump"
+    MINTRO: "BrUimx7KncgRNTggAdZdaX2s5XUqQyR6XMRmEg4mpump"
+    IMDSTR: "0x80271ce20184e38f4afe90d4ca134304d197aca2"
+    HIGGS: "DoVAVzViX8Bjy3r15nwikSaSbzE6dV4ovd28aWpJpump"
+    CAST: "D5X4EM9nSAWKrFZdChmqHSDQDFqGDcZRsKfJsKUWpump"
+    CLAUS: "0x1b54e762aa34cf6e28e9c082f2848e28e45da6b8"
+    LOANED: "3AJfvAL3ijqZZxhk3L6d5phAoy8LA1npgQfEUbVkpump"
+    GTA6COIN4: "RnmXvLvMEEbVSxMmdzECKhkxFFnNbqXD5pGwWMaHJFe"
+    SM: "Aqv8Gj8MesSzuEsgigq4kEDWVRFHgPUZq4Po4Q1Mpump"
+    MICKIEY2: "9F3AJPYY6McEJy5YoHrEQKEbJVKWgCXwkAssEhRquxsH"
+    ELON4: "HKswtvbWtYd8k8b7A96aKAZJCPRM4xS8PWbuktizvmJB"
+    ASTEROID: "0xf280b16ef293d8e534e370794ef26bf312694126"
+    XDOG: "4xZeCUZc8k9Hkj614ALxJVibtCSEp1jS43uTtmBfpump"
+    CAT3: "GUocCe61ScWyobd1hK1hTPgStmx2JaxT6gv5VcxRpump"
+    DISCAT: "D9MY25yE86DA3VSgjuoL69KihGWaLXpd1MF8EvXupump"
+    INJECTOR: "3yvK6WWww1moF3qx3UvHngZCHy9kRCVd9Jva8tRrpump"
+    TRUMP3: "DTJH55QeU3wUqMJBpCsi29qCVbJLL95qwRwqCgRrYd9j"
+    TRENCHER: "6UX5Y5cBdMd5oW9WP7WnbCHaZNcFc6FQ9R7q4n9cpump"
+    CATCRAFT: "ADPN2aqzY5RhkBC7bNQWFhTFFEYKY4drHUQG887Cpump"
+    BINDER: "BQxzR4pLkDw46gzbrkRjFuUSsgvN5BhTWHh6EXUwf3F"
+    USDF: "2Jwd9SRVKci3wpN2XBbcGoVRgFPeWEF5J5pPaPoLpump"
+    NMR: "0x1776e1f26f98b1a5df9cd347953a26dd3cb46671"
+    COINBASE: "LSFrX88yZtVPvg6x8uPf8mBCaGbJDcYWXcYfm9Npump"
+    SI27: "8n2BE3HdAEmLgXsWyVt2q5wBygrGmuzH87Xh46kCpump"
+    MARU: "5iBXD3xQDgH6DnLaY9wC4dcXfWfrF6BpVdotFtKWpump"
+    MRBEAST3: "G5ZbukM6pmn3S9gnN4Dzpwt2mZxLB9EBvpMzJAapump"
+    COINBASE2: "CwYWfnHBv5WrzWVRzWssBK8vzhvpzLky6o6Vxhppump"
+    SPCXTSLA: "8WnqhViGhJ8t4i22Kip8QUEuw7nGyqRqUdVhn11pump"
+    TITS: "3PMHcyrh3jRbnG7EcAmdyazoLJu1ZJoYUPUtco2ipump"
+    LLL: "4sshcpAhpCyZe4reg2TUtSninFDv5t1mU5uiXT6rpump"
+    ZEVIO: "0x5df882f8788071b67d0283f958ca3cdc17f1ae2b"
+    ANVL: "0xaeeaa594e7dc112d67b8547fe9767a02c15b5597"
+    EDWARD: "vQkSRkGRSGgR32YzrsZjhUka2BNFd5nQ4jEaLeqpump"
+    UPEG: "0x44b28991b167582f18ba0259e0173176ca125505"
+    LAPTOP: "0xb095274743941e953c746f9c228da9c18bb6ec29"
+    SPEED2: "D9YQCXZ1nEzx6xYPuGGkqrQTcq651ugo3idnztaHiVZ5"
+    A1: "FAopSovS2WFJK5qEAmcuwAVH98CvmBwT6Lpq4EK2pump"
+    SIMD: "0xb6026518463ec80f1cb33e4318e802487c27f995"
+    FORM8: "2WXSo5zKebUyJy7VVHCUQ7vFDf7MDYhfQTBMw9Z5pump"
+    FRANK: "HbPDWSqu8hpVMX6gMjwMDGe5rVgicWo3Qh3Jaojypump"
+    KIVO: "74D4erPF1BvDg3NSy4DooRKrQD78sbhU1EHR2n4wpump"
+    SI276: "HMYd9tosnUXuNHmq7pXmoePRVBLBBjA3JBfydq6upump"
+    WPRL: "0x07696dcab55e62cfef953666b29fe1970518cb00"
+    DGEN3PE6GB: "3PE6gBmCYrkKfzupjM4rexqDGE64ZR33VSxwFUpApoS3"
+    SWORDINU: "2BVfJ4AHMvHdKtEZNHaBr48dQzTfZvYkjaaxbM6bpump"
+    TIKTOK: "4SebowjnWyHmsgVWKRi3wjynxtoVa7rsbYJDXgXN7bgt"
+    GUNNER: "xsyrZHSQhhzPVydHvKZwz5NtjMYGpGaiK4L1qfapump"
+    NASA2: "BzGGcKBppByKXfRc8vX16WMtuyAEQAMnfvtGBfx9pump"
+    1F916: "0x9e00fc92493451eba1c63dd3880d68b622037ba3"
+    DRV: "0x9d0e8f5b25384c7310cb8c6ae32c8fbeb645d083"
+    LIVEPAD: "8z17L5WBEnWJ1EHAYj6BrBeH2vjdTMci3gCBtRBpump"
+    DGUY: "0xe34356dcd3d7bb991248f322e4ec31b5d60bc54e"
+    OGN: "0x8207c1ffc5b6804f6024322ccf34f29c3541ae26"
+    COURT: "6H2w7aFMVNuAVt8VbHUiFhosydiZVjC9QEGgkmodpump"
+    ULTRAFAST: "CME4tRWxTziDsQWCKNuvdFSme3MTjiPDcV4CRk1Hpump"
+    KOTH: "EM5oiqCacm6PvakBb2TTGAKeHaqkzUeSfGZGPH4BYv9X"
+    PUMPWHEEL: "HqHrrtafZmo5RCmbod4K9ExUnDgs85obetMukyQ3pump"
+    PUTER: "FgnSJwFoote99diZUhtRV9Ajcfwzjj6hDx82TDhVpump"
+    DEGENT: "F5VPPwhd2ouNhMjEjsMiShS3xTLyqqouaa1au5CHpump"
+    FATTY: "6fxp6A1sX41HdFdbkGeGiSPPVLGxQkXEVCRoaoDQpump"
+    BARRON3: "FooCz3fLixgU7u3tGBKyoU3uBsmhzJHMuKuPgMdbWsm9"
+    ZKDARK: "HXqxTwCzREUXNK4CbNDgNEUEh2jLzFKdC4tvTuojpump"
+    TARIFFSDON: "DEZ8t15WgTFrEdnbRdr58kGUUYqGfgLE6UVyrAUY5wTw"
+    OPENAI: "9r4m7oo74fuoMRbKzaJjXLvTvDWr15qXbGvNL7c8pump"
+  # Multi-chain (broker/memecoin/chains/registry.py): chain names to
+  # enable. "solana" is this adapter's native SOL-settled engine; every
+  # other chain gets a USDC-settled paper ChainAdapter with its own
+  # state under <data_dir>/chains/<chain>/. Default: ["solana"].
+  chains: ["solana"]
+  # Runtime wallet-key pattern (broker/memecoin/WALLET_SECURITY.md).
+  # The SECRET is read at runtime only — never put one in this file.
+  wallet:
+    key_source: none    # none | env | file
+    key_file: ""        # path when key_source=file (must be 0600 or stricter)
+
+symbols:
+  - BONK
+  - POPCAT
+  - SOL
+  - SATOSHINU
+  - LOOONGCAT
+  - PIXEL
+  - SDESK
+  - GROK
+  - SXSN
+  - FLO
+  - PIG
+  - GYM
+  - PIXEL2
+  - CAT
+  - PUMPKIN
+  - TACO
+  - WOJAK
+  - MUSEAI
+  - 8BIT
+  - BITFOOTS
+  - CAT2
+  - LTC
+  - BITS
+  - LONE
+  - PIXEL3
+  - ROBIN
+  - WOJAK2
+  - XMRPAD
+  - DGEN7ERMTP
+  - JEANSEAL
+  - STOCKCAT
+  - DGENHUS3BZ
+  - ELECTROCATED
+  - FOMO
+  - KITTYLICK
+  - METAMASK
+  - ROBINHOOD
+  - GTAIV
+  - DGEN7UJ4XH
+  - CHICK
+  - COWF
+  - ONDO
+  - DSYNC
+  - AURORA
+  - LSK
+  - QNT
+  - VIBE
+  - B3
+  - CONDO
+  - GITLAWB
+  - DOT
+  - BSTONK
+  - FET
+  - EDGE
+  - PHA
+  - STONKEX
+  - THICC
+  - MANDATE
+  - FOMIE
+  - DEGENBORN
+  - DRAFT
+  - MICKIEY
+  - GRAILS
+  - KITTY
+  - DOGE
+  - DOGE2
+  - PAPOI
+  - DIHVIDENDS
+  - TRUMP
+  - MINI
+  - KINTARO
+  - GOLIT
+  - SINGLE
+  - TOM
+  - PUTE
+  - SHIT
+  - CREAM
+  - DRB
+  - AROS
+  - FRIC
+  - AERO
+  - OFFWORLD
+  - SITTINGDOG
+  - RUNPEPE
+  - SPONGIEZ
+  - AAUT
+  - JPKK
+  - 0XPAYMENT
+  - CYBERSHAMA
+  - TOSV
+  - MEME
+  - MEMECARD
+  - ENA
+  - A16Z
+  - CCRU
+  - GTAVI
+  - URMOM
+  - QUOTE
+  - FOMOBANANA
+  - SPONGIES
+  - DDOSCAT
+  - FIZZ
+  - PWEASE
+  - WIFPAID
+  - GEMI
+  - CLASHPAD
+  - NEWGUY
+  - GITHUB
+  - GAZETTE
+  - BIOACC
+  - BIRDS
+  - GATOR
+  - GUMMYCAT
+  - ANTITHESIS
+  - TOE
+  - DGENTRGAFW
+  - HYDX
+  - ONEPIECE
+  - ZVM
+  - ZCAT
+  - IRAN
+  - ELONG
+  - FIRM
+  - HIVE
+  - DGENF8QNED
+  - GNX
+  - WUKONGBM
+  - USEGROK
+  - GRUMPYGRAN
+  - IRAN2
+  - FRANKLIN
+  - BEAST
+  - FLETCHER
+  - HUNTBODEN
+  - TROLLOWEEN
+  - CATSTR
+  - XMRPAD2
+  - XVAULT
+  - INSTA
+  - BUNS
+  - TOKENIZE
+  - STOCKLING
+  - MRBEAST
+  - BOB
+  - BARRON
+  - AROS2
+  - HOOD
+  - KACC
+  - BEZEL
+  - MRBEAST2
+  - SLOPCANNON
+  - FIM
+  - KIRK
+  - FIM2
+  - HOOD2
+  - SEND
+  - DGENJGHJBT
+  - SHFL
+  - LEVEDOG
+  - WACC
+  - COPYCAT
+  - PHI
+  - STRAK
+  - VISCACHA
+  - BASKET
+  - GTA6COIN
+  - TRELLIS
+  - DIO
+  - LOADPAD
+  - MCAP
+  - NEARLY10
+  - PANDA
+  - SICAT
+  - TOONPAD
+  - SLOTVINE
+  - SNOWMOON
+  - CLAUDE
+  - COMMISH
+  - STARDIH
+  - STANLEY
+  - MAGACOIN
+  - LEFT
+  - YEE
+  - CODMW4
+  - TAZER
+  - BLAST
+  - HYPE
+  - MESUB
+  - FROINKCAT
+  - LOADPAD2
+  - CLONES
+  - ZTHERO
+  - PAYDAY
+  - INDX
+  - SPONGEBOB
+  - RESID
+  - CATCLONES
+  - OFFICE
+  - SPIKE
+  - BOTCHAIN
+  - LOOMER
+  - SOCIAL
+  - MEMO
+  - NFLSZN
+  - RP
+  - RENAISSANCE
+  - BOAR
+  - BER
+  - TIBBIR
+  - NEURAL
+  - KOD
+  - DGEN5SXXKV
+  - YIELDCAT
+  - TOAD
+  - TREECOIN
+  - AP
+  - XDP
+  - HARVARD
+  - GAVEL
+  - STONKPILE
+  - COMMISH2
+  - NOKO
+  - RAY
+  - STOCKER
+  - ZC
+  - STANLY
+  - FOMO2
+  - NASA
+  - XSI
+  - GM
+  - XENEURO
+  - JELLY
+  - SI
+  - FINGER
+  - FUSE
+  - APE
+  - STOCK
+  - PARASITE
+  - SIUUU
+  - ZRO
+  - SI2
+  - DOTPAD
+  - BMW
+  - POTUS
+  - MCDONALDS
+  - BITCOINSIGUY
+  - COIN
+  - AIRPAD
+  - EDEL
+  - DOTTY
+  - WICK
+  - DADDY
+  - SIS
+  - RAYZE
+  - JELLY2
+  - PINK
+  - SWEAT
+  - PUSH
+  - TRUMP2
+  - BAGROOM
+  - RAIL
+  - MERIDIAN
+  - BRAINWORM
+  - AMC
+  - SA
+  - HERMS
+  - SB
+  - DGENF7FFFJ
+  - DICKBUTT
+  - CLOSEDAI
+  - TESTCAT
+  - TECH
+  - POD
+  - GTA6COIN2
+  - ARX
+  - DIT
+  - GTC
+  - ROBINHOOD2
+  - WALLET
+  - FUGU
+  - INU
+  - EAGLE
+  - AGL
+  - BMW2
+  - BACK
+  - PUMPCAT
+  - NIVI
+  - MONEYSAVE
+  - GTAVI2
+  - ELON
+  - BARRON2
+  - LFI
+  - MASK
+  - VELVET
+  - GENIUS
+  - SPEED
+  - HOTBOT
+  - ZUCKAI
+  - FWA
+  - SOCKET
+  - PUZZLE
+  - GAKU
+  - SUPER
+  - GLOW
+  - SS
+  - IXS
+  - FILLED
+  - ELON2
+  - DOGS
+  - RATSPEAK
+  - POISE
+  - ZAMA
+  - ABU
+  - GS
+  - XCHANGE
+  - STARBUCKS
+  - TREASURY
+  - ATH
+  - BASEPAD
+  - AEON
+  - MODERTS
+  - SURE
+  - VERIDIA
+  - HAALAND
+  - DGENEKB3GK
+  - BONERPILLS
+  - SENTLY
+  - KNIGHTCAT
+  - HUMAN
+  - JESTY
+  - XMAN
+  - ELONHOTDOG
+  - KKK
+  - NIKE
+  - DGEN2Y8G9C
+  - AGENTCAT
+  - GTA6COIN3
+  - KURA
+  - ELON3
+  - FOMOBURN
+  - DREADBORN
+  - 76ERS
+  - MINTRO
+  - IMDSTR
+  - HIGGS
+  - CAST
+  - CLAUS
+  - LOANED
+  - GTA6COIN4
+  - SM
+  - MICKIEY2
+  - ELON4
+  - ASTEROID
+  - XDOG
+  - CAT3
+  - DISCAT
+  - INJECTOR
+  - TRUMP3
+  - TRENCHER
+  - CATCRAFT
+  - BINDER
+  - USDF
+  - NMR
+  - COINBASE
+  - SI27
+  - MARU
+  - MRBEAST3
+  - COINBASE2
+  - SPCXTSLA
+  - TITS
+  - LLL
+  - ZEVIO
+  - ANVL
+  - EDWARD
+  - UPEG
+  - LAPTOP
+  - SPEED2
+  - A1
+  - SIMD
+  - FORM8
+  - FRANK
+  - KIVO
+  - SI276
+  - WPRL
+  - DGEN3PE6GB
+  - SWORDINU
+  - TIKTOK
+  - GUNNER
+  - NASA2
+  - 1F916
+  - DRV
+  - LIVEPAD
+  - DGUY
+  - OGN
+  - COURT
+  - ULTRAFAST
+  - KOTH
+  - PUMPWHEEL
+  - PUTER
+  - DEGENT
+  - FATTY
+  - BARRON3
+  - ZKDARK
+  - TARIFFSDON
+  - OPENAI
+
+timeframes:
+  - H1
+
+strategies:
+  ema_rsi:
+    enabled: true
+    ema_fast: 20
+    ema_slow: 50
+    rsi_period: 14
+    atr_period: 14
+    rsi_overbought: 70.0
+    rsi_oversold: 30.0
+    atr_sl_multiplier: 1.5
+    atr_tp_multiplier: 3.0
+
+risk:
+  fixed_lot_size: 0.01
+  use_percent_risk_sizing: false
+  # Fractions of EQUITY (0.01 = 1%). Daily-loss accounting is done on
+  # equity, not balance — floating losses count.
+  max_risk_per_trade: 0.01
+  max_daily_loss: 0.03
+  max_open_positions: 3          # bot's OWN positions (magic-number filtered)
+  max_total_exposure_lots: 1.0   # own open volume + new request, in lots
+  max_consecutive_losses: 4
+  max_correlated_positions: 1    # stacked correlated bets allowed alongside a request
+  require_stop_loss: true
+  min_account_equity: 0.0        # 0 = disabled; gateway blocks below this
+  max_spread_points: 0.0         # 0 = disabled; in price points (tick-derived)
+
+autonomy:
+  # signals_only | assisted | autonomous
+  # signals_only: detect + report signals, never request trades
+  # assisted:     request trades, agent/human approves at the gateway input
+  # autonomous:   approved signals flow to the gateway without a human tap
+  # (the gateway's risk checks apply identically in every mode)
+  mode: assisted
+
+worker:
+  enabled: false
+  url: ""
+  poll_interval_seconds: 30
+
+exits:
+  enabled: true
+  max_hold_hours: 48.0
+  breakeven_trigger_atr: 1.0
+  trailing_activation_atr: 2.0
+  trailing_atr_multiplier: 1.5
+  check_interval_seconds: 60
+
+# Degen launch radar — real-time new-coin detection (pump.fun launches,
+# DexScreener boosts on solana/base/ethereum/robinhood, Hyperliquid spot
+# listings). Qualified launches get a paper BUY + ALWAYS a Telegram card
+# with the CA. Paper-only; kill-switch respected; entries are idempotent
+# per mint (never double-enter).
+degen:
+  enabled: true
+  poll_interval_seconds: 15
+  entry_sol: 0.05            # fixed paper size per launch
+  max_positions: 5           # max concurrent degen paper positions
+  min_usd_market_cap: 10000  # early-traction bar for fresh launches
+  max_age_minutes: 10        # "early" window for a fresh launch
+  velocity_multiplier: 3.0   # mcap x3 within velocity_window -> candidate
+  velocity_window_minutes: 10.0
+  stop_loss_pct: 30.0        # wide degen stops
+  take_profit_pct: 200.0
+  max_hold_hours: 4.0
+  # Two-tier exits (2026-10-01 backtest: every variant beat single exits,
+  # cutting the per-trade bleed ~65-75% on 109 trustworthy paper closes):
+  # leg A keeps the exits above; leg B (runner half) skips the fixed TP
+  # and holds up to tier_b_max_hold_hours with the same trail. Disable
+  # with two_tier_enabled: false to restore single-position behavior.
+  two_tier_enabled: true
+  tier_b_max_hold_hours: 24.0
+  # Proof-of-demand checks (2026-10-02, measurement only): for every
+  # scored confirmed runner, record LP-lock, holder-concentration and
+  # distribution verdicts into state["proof_checks"]. Nothing gates on
+  # them yet — after ~1 week the ledger decides whether any check
+  # becomes a real entry/pick gate. Disable with proof_enabled: false.
+  proof_enabled: true
+  proof_holder_top10_max_pct: 40.0  # fail when top-10 wallets own more
+  proof_holder_single_max_pct: 20.0 # fail when one wallet owns more
+  proof_dump_sell_ratio: 2.0        # fail when h1 sells >= this x buys
+  proof_insider_max_pct: 20.0       # fail when insider cluster owns more
+  proof_timeout_s: 8.0              # per-check HTTP budget
+  # Footprint signals (2026-10-02, measurement only): for every scored
+  # confirmed runner, record holder-velocity (crowd arriving?) and
+  # accumulation (volume spiking while price flat?) into
+  # state["footprint_signals"], read from the fingerprint time series.
+  # Nothing gates on them yet — after ~1 week the ledger decides
+  # whether any signal becomes a real entry/pick gate. Disable with
+  # footprints_enabled: false.
+  footprints_enabled: true
+  fp_velocity_crowd_per_min: 1.0  # provisional "crowd" threshold (holders/min)
+  fp_velocity_min_window_min: 5.0 # min span between holder observations
+  fp_accum_vol_accel: 2.0         # vol spike multiple vs earlier polls
+  fp_accum_price_flat_pct: 10.0   # |price change| at/under = "flat"
+  auto_enter: true           # paper BUY on confirm (alert always sent either way)
+  # --- strict runner confirmation (stage 2) ---
+  # A candidate only becomes an alerted runner when ALL of these hold:
+  confirm_gain_mult: 1.8            # mcap up >= 1.8x from first sighting
+  confirm_rising_polls: 3           # price rising in N consecutive polls
+  confirm_min_m5_volume_usd: 3000.0 # real money moving in last 5 minutes
+  confirm_min_liquidity_usd: 12000.0
+  confirm_min_buys_m5: 5
+  confirm_min_buy_sell_ratio: 1.5   # demand, not distribution
+  confirm_window_minutes: 30        # drop silently if never confirms
+  # --- pre-entry safety gate (rug / honeypot screening) ---
+  safety_gate: true              # RugCheck (sol) / GoPlus (base, eth)
+  safety_fail_closed: false      # retained for compatibility; the confirm gate
+                                 # is now ALWAYS fail-closed on unknown (strict
+                                 # 1/100: no score, no CA)
+  # --- trailing profit lock ---
+  trail_trigger_pct: 50.0        # arm trailing stop once up this much
+  trail_drawdown_pct: 30.0       # exit on this pullback from the peak
+  # Leg A profit lock (v2 exits, 2026-10-02): the classic half banks
+  # profit early — once its peak hits leg_a_trail_trigger_pct, a
+  # leg_a_trail_drawdown_pct pullback exits ("profit_lock") instead of
+  # round-tripping to the stop. Leg B (runner) keeps the single
+  # trail_trigger_pct/trail_drawdown_pct stage only.
+  leg_a_trail_trigger_pct: 20.0  # Leg A: arm the profit lock at +20%
+  leg_a_trail_drawdown_pct: 15.0 # Leg A: exit on 15% pullback from peak
+  # --- risk governor ---
+  daily_max_loss_sol: 0.15       # pause new entries past this daily loss
+  bundle_max_cluster_pct: 30.0   # deep-scan fail: bundled supply share
+  smart_poll_seconds: 60.0       # smart-money wallet poll cadence (Helius); effective poll = max(this, tracked_wallets*12s) so >5 wallets slows the cadence instead of blowing the Helius credit budget
+  smart_boost_wallets: 2       # tracked wallets buying -> confirmation boost
+  smart_rising_polls: 2        # rising polls needed when boosted
+  smart_fasttrack_enabled: true # tracked-wallet buys of brand-new mints -> instant card (still gated by _instant_verdict, still capped)
+  smart_grade_dedup_days: 7.0  # same (wallet, mint) buy not re-recorded within this window
+  smart_grade_window_days: 30.0 # trailing window for /smartgrade PnL grades
+  deployer_tracking_enabled: true # resolve launch creators lazily (cached); hot deployers get a 🏭 line on the card
+  deployer_hot_hit_rate: 0.30  # hot deployer: >= min launches AND >= this 2x-hit rate
+  deployer_min_launches: 3     # minimum launches before a deployer can be hot
+  deployer_resolve_ttl_s: 21600.0 # deployer cache TTL (6h); negative results cached too
+  early_safety_flash: true     # flash RugCheck/GoPlus before instant CA
+  early_flash_timeout_s: 4.0   # flash check HTTP budget
+  early_min_score: 1.0         # quality gate: min safety score (standing bar 1/100, user decision 2026-09-27)
+  # --- RugCheck insider gates (Solana): bundled-launch protection ---
+  insider_cluster_max_pct: 20.0  # fail if insider clusters hold > this % of supply
+  graph_insiders_max: 5          # fail if more insider wallets detected
+  # --- EVM sell simulation (Base/Ethereum): Honeypot.is, free ---
+  evm_sell_sim_enabled: true     # real buy->sell simulation on top of GoPlus
+  evm_sell_sim_timeout_s: 3.0    # per-call HTTP budget for the simulation
+  early_alert_max_per_window: 4    # spam guard: instant alerts per window (standing 4/hour, user decision 2026-09-27)
+  early_alert_window_seconds: 3600.0
+  # --- sniper tier: runner-probability ranking ("monitor wide, alert narrow") ---
+  # Quality-passed candidates are scored 0-100 (sniper.py); score >=
+  # sniper_tier_threshold alerts instantly (still capped at 4/hour,
+  # highest rank first); below threshold joins the digest queue.
+  # Nothing is ever silently discarded. Weights are review-tunable;
+  # safety gates never self-tune and are untouched by this module.
+  sniper_enabled: true
+  sniper_tier_threshold: 50.0
+  sniper_weight_fp: 30.0
+  sniper_weight_smart: 35.0
+  sniper_weight_velocity: 20.0
+  sniper_weight_pressure: 10.0
+  sniper_boost_deployer: 5.0
+  # --- narrative-heat boost, idea #5 (user decision 2026-09-28) ---
+  # Hot-narrative coins earn up to narrative_boost_max extra sniper
+  # points, scaled by (heat - 1.0). Cold narratives never penalize.
+  narrative_boost_enabled: true
+  narrative_boost_max: 8.0
+  # --- feedback loop, idea #6 (user decision 2026-09-28) ---
+  # Daily outcome analysis -> tuning PROPOSALS only. Nothing applies
+  # without the user's explicit /tune apply; safety gates never tune.
+  feedback_enabled: true
+  feedback_min_outcomes: 20
+  # --- smart-wallet auto-discovery, idea #2 (user decision 2026-10-01) ---
+  # Once a day, mine early buyers of past 5x+ runners and store wallet
+  # proposals for review. Proposals ONLY — /smartadd is the only path
+  # to the tracked registry; nothing auto-adds.
+  discovery_enabled: true
+  discovery_runner_mult: 5.0
+  discovery_early_window_s: 3600
+  discovery_min_hits: 2
+  discovery_min_hit_rate: 0.5
+  discovery_max_runners: 10
+  discovery_max_sigs: 30
+  discovery_max_new: 5
+  discovery_interval_s: 86400
+  # --- winner-likeness ranker, idea #5 (user decision 2026-10-01) ---
+  # Every confirmed/lowcap runner is scored 0-100 against the bot's own
+  # 10x+ history (the score rides on the card). winner_min_score is OFF
+  # (0) until the user approves a threshold via /tune — then runners
+  # scoring below it are held out of the top tier. Hard safety gates
+  # are never affected by this ranker.
+  winner_min_score: 0.0
+  # --- sustained-velocity tier, idea #4 (user decision 2026-10-01) ---
+  # Re-check each confirmed runner sustained_delay_min after its first
+  # alert: SUSTAINED earns a louder top-tier card, FADING/DEAD stay
+  # silent (logged only, never spam). Uses the milestone peak as the
+  # reference — the first alert is never delayed or changed.
+  sustained_enabled: true
+  sustained_delay_min: 30.0
+  sustained_peak_hold_pct: 70.0
+  sustained_lookback_min: 15.0
+  sustained_max_drawdown_pct: 30.0
+  # --- second-wave measurement, idea #3 (user decision 2026-10-01) ---
+  # Every published launch.second_wave card is recorded; 24h later the
+  # forward multiple (milestone peak / wave-time multiple) settles into
+  # a ledger. The daily learner only PROPOSES trigger tweaks after
+  # >=10 settled waves prove an edge. Nothing auto-tunes.
+  wavefront_enabled: true
+  # --- Top Picks shortlist (user decision 2026-10-01) ---
+  # Once a day at toppicks_time (WAT), the last 24h of confirmed runners
+  # are ranked by composite score and ONE card drops the top
+  # toppicks_count — the shortlist to gamble from. Ranking only.
+  toppicks_enabled: true
+  toppicks_count: 5
+  toppicks_time: "08:00"         # WAT slot for the daily picks card
+  # Weekly learner review (user decision 2026-09-28): one card every
+  # Monday 08:00 WAT summarizing new proposals, applied changes and
+  # their grades, and the week's win rate. Informational only.
+  # NOT a learning knob — the learner can never reschedule its review.
+  review_enabled: true
+  review_weekday: 0            # 0=Monday … 6=Sunday (WAT)
+  review_time: "08:00"         # WAT slot for the weekly card
+  # --- confirmed-runner alert lane (user decision 2026-09-28) ---
+  # Chart-confirmed runners (multi-poll proof) drop the CA even when no
+  # safety report exists — the chart proof IS the analysis. They carry a
+  # prominent UNVETTED label instead of a score. Hard fails (honeypot /
+  # can't-sell / high sell tax / insider clusters) still block where a
+  # report exists. Unconfirmed coins stay silent as before.
+  confirm_unvetted_alerts: true
+  # Safety-unknown coins (screen ran, no report — NOT known-bad) join the
+  # hourly digest with a prominent UNVETTED label. Never instant alerts,
+  # never paper entries. Hard fails, safety errors, below-bar scores stay
+  # held silently. User decision 2026-09-28; not a learning knob.
+  digest_include_unknown_safety: true
+  # Early-digest pause switch (user decision 2026-10-02): the hourly
+  # digest was batching ~1,300 early/unvetted coins a day into 70+
+  # Telegram cards — a firehose nobody reads. Paused: the queue is
+  # dropped silently at flush time (milestone tracking already ran at
+  # enqueue, so runners-recap coverage is preserved). Confirmed
+  # runners, warnings, recaps, and Top Picks are untouched. Planned
+  # return: a rebuilt digest showing ONLY coins passing the 3
+  # proof-of-demand checks, once their measurement week concludes.
+  early_digest_enabled: false
+  # --- runners recap (user decision 2026-09-28) ---
+  # Twice-daily card listing only the coins that actually ran (>=
+  # recap_min_mult from their card-time anchor) since the last recap.
+  # Informational only: never trades, never gates. Times are WAT
+  # (Africa/Lagos, UTC+1, no DST).
+  recap_enabled: true
+  recap_times: ["08:00", "20:00"]
+  recap_min_mult: 2.0
+  recap_max_items: 20
+  milestone_max_tracked: 1000  # milestone watch holds this many recent carded coins (~a full day); the runners recap needs the whole day, not just the last 120
+  # --- low-cap runner hunter: catch runners at low mcap, pre-viral ---
+  lowcap_enabled: true           # alert-only tripwire, never a paper entry
+  lowcap_mcap_ceiling_usd: 500000.0  # only coins at/below this mcap
+  lowcap_min_run_pct: 50.0       # CA drops only inside this running band...
+  lowcap_max_run_pct: 150.0      # ...above it the coin already went viral
+  lowcap_rising_polls: 2         # consecutive rising polls needed
+  lowcap_min_m5_volume_usd: 2000.0
+  lowcap_min_liquidity_usd: 8000.0
+  lowcap_min_buys_m5: 4
+  lowcap_min_buy_sell_ratio: 1.3
+  lowcap_window_minutes: 45      # tracking window per coin
+  lowcap_fp_boost_enabled: true  # HOT fingerprints count as 1 rising poll
+  # --- early fingerprints: buy/volume acceleration + holder growth ---
+  fp_enabled: true               # fingerprint tracker on/off
+  fp_window_polls: 6             # per-mint observation window
+  fp_min_polls: 3                # polls before a score is produced
+  fp_buy_floor: 3.0              # accel denominator floor (buys)
+  fp_vol_floor_usd: 1000.0       # accel denominator floor (5m vol usd)
+  fp_hot_score: 70.0             # composite >= this -> HOT
+  fp_warm_score: 45.0            # composite >= this -> WARMING
+  fp_holder_refresh_s: 600       # min seconds between holder refreshes
+  fp_holder_per_cycle: 3         # max fresh holder lookups per cycle
+  logstream_enabled: true      # sub-second program-log detection thread
+  usdc_pools_enabled: true     # USDC-quoted new pools (GeckoTerminal, ~1/min)
+  # --- established-coin momentum scanner (trending pools) ---
+  momentum_enabled: true         # scan GeckoTerminal trending pools for runners
+  momentum_scan_seconds: 300     # poll interval (~5 min)
+  momentum_networks:             # gecko networks scanned for trending runners
+    - solana
+    - base
+    - eth
+  momentum_min_gain_24h: 20.0    # 24h gain floor % (must be running)
+  momentum_max_gain_24h: 300.0   # 24h gain ceiling % (anti-top-buying guard)
+  momentum_max_drawdown_1h: 15.0 # 1h change must not be worse than -this %
+  momentum_min_vol_24h_usd: 100000.0  # 24h volume floor (real trading)
+  momentum_min_liq_usd: 50000.0       # liquidity floor (can exit)
+  momentum_cooldown_hours: 6.0   # per-pool alert cooldown
+  momentum_lowcap_max_mcap_usd: 10000000.0  # lowcap lane ceiling: mcap at/below -> "lowcap" lane, above/unknown -> "established" lane
+  momentum_lowcap_min_mcap_usd: 50000.0     # lowcap lane floor: known mcap at/below -> excluded entirely (dust zone, no alert)
+  shadow_enabled: true              # shadow ledger: paper-simulate blocked runners (measurement only, never trades)
+  shadow_max_open: 20               # max concurrent shadow positions
+  shadow_stop_pct: 30.0             # shadow stop-loss: close at -30% from hold-time mcap
+  shadow_tp_pct: 200.0              # shadow take-profit: close at +200% from hold-time mcap
+  shadow_max_hold_hours: 24.0       # shadow timeout: close whatever remains after 24h
+  shadow_pending_timeout_minutes: 60.0  # shadow pending: drop first-sight holds that never get a price after 60m (no-data, not a loss)
+  warn_enabled: true              # early-warning lane: UNCONFIRMED alerts for held-but-moving coins (main 1/100 stream untouched)
+  warn_min_score: 1.0             # warning floor: known score >= 1 (unknown/unscored stay silent)
+  warn_max_per_hour: 4            # global rate limit for the warning lane
+  warn_cooldown_hours: 0.5       # per-coin warning cooldown (0.5h = 30 minutes)
+  warn_min_buys_m5: 20.0          # launch door: first-sight momentum needs >= 20 buys/5m
+  warn_min_vol_m5_usd: 5000.0     # launch door: ... and >= $5k vol/5m
+  insider_track_enabled: true     # insider behavior tracker: snapshot + trend insider supply share
+  insider_watch_max: 40           # max mints on the insider watchlist
+  insider_refresh_minutes: 15.0   # re-check insider footprint this often
+  insider_fast_minutes: 5.0       # fast-start: newly watched mints refresh this often ...
+  insider_fast_window_minutes: 60.0  # ... for this long after first watch, then back to normal
+  insider_ledger_max: 200         # cap of insider-outcome rows kept (Phase 1 evidence)
+  logstream_rpc_urls:          # failover pool for tx fetches (first healthy wins)
+    - https://api.mainnet-beta.solana.com
+    - https://solana.public-rpc.com
+    - https://rpc.ankr.com/solana
+  # --- social sentiment tracker (keyless DexScreener profile velocity) ---
+  sentiment_enabled: true      # sentiment tracker on/off (soft boost only)
+  sentiment_per_cycle: 2       # max fresh profile fetches per judge cycle
+  # --- AI narrative picker + heat tracker (soft signal only) ---
+  narrative_enabled: true      # narrative classification + heat on/off
+  # --- backtesting engine: closed candidates -> JSONL dataset ---
+  backtest_enabled: true       # dataset recorder on/off
+  backtest_dataset_path: ~/.forex-agent/launch_scanner/backtest_dataset.jsonl
+  # --- entry-timing latency (measurement only) ---
+  latency_enabled: true            # entry-timing tracker on/off (measurement only: never trades, never gates)
+  latency_window_coins: 100        # rolling window of the last N carded coins for median/p90 latency
+  # --- second-wave re-entry ---
+  second_wave_enabled: true        # re-entry tracking on/off (card + paper entry on pullback->re-acceleration)
+  second_wave_pullback_pct: 40.0   # pullback >= this % from the peak multiple marks the trough
+  second_wave_releg_gain_pct: 50.0 # re-acceleration >= this % from the trough confirms the wave
+  second_wave_reentry_window_min: 45.0  # trough older than this never fires (stale)
+  second_wave_cooldown_hours: 6.0  # one second-wave card per coin per this many hours (independent of the main duplicate-card cooldown)
+  # --- slow-cooker late runners (ACTIONABLE: card + paper entry on a late 2x) ---
+  slow_cooker_enabled: true        # late-runner watch on/off (reuses the milestone watch records; never builds its own pool)
+  slow_cooker_window_hours: 3.0    # watch carded-but-quiet coins this long past their card for a late 2x
+  slow_cooker_trigger_pct: 100.0   # late-runner trigger: gain >= this % from the card-time anchor (100 = 2x)
+
+performance:
+  enabled: true
+  interval_hours: 6.0
+  lookback_days: 30
+
+kill_switch:
+  check_interval_seconds: 10
+
+events:
+  enabled: true
+  queue_max: 1000
+
+notifications:
+  enabled: false
+  # Dispatcher loop: how often to check the delivery journal for new events.
+  poll_interval_seconds: 5.0
+  # HTTP timeout (seconds) for worker / fcm / webhook delivery.
+  timeout_seconds: 5.0
+  # Bounded retries for NOTIFICATION delivery only (2 attempts = 1 retry).
+  # The dispatcher never touches trade execution — there is no execution
+  # path here to retry.
+  max_attempts: 2
+  backoff_seconds: 1.0
+  # Per-channel enable flags. The agent channel (localhost SSE journal) is
+  # the PRIMARY path and is always available; the rest are optional sinks.
+  channels:
+    agent: true
+    worker: true
+    fcm: false
+    webhook: false
+    telegram: false
+  # Telegram (optional). The bot token is a secret: it comes from the
+  # TELEGRAM_BOT_TOKEN env var ONLY and must never be written in yaml.
+  # Target chat: TELEGRAM_CHAT_ID env var (preferred) or telegram_chat_id.
+  telegram_chat_id: ""
+  # Webhook POST target. Prefer the NOTIFY_WEBHOOK_URL env var — the URL
+  # may embed a token, and secrets never belong in yaml.
+  webhook_url: ""
+  # FCM (mobile push, worker-mediated, optional/legacy). Project id comes
+  # from the FCM_PROJECT_ID env var when set.
+  fcm_project_id: ""
+  # Worker push endpoint path for FCM, e.g. "/notify". Empty = the Worker
+  # contract defines no per-event push endpoint yet (see
+  # worker/CONTRACT.md), so the FCM channel honestly reports unconfigured
+  # until this is set.
+  fcm_push_path: ""
+  # Severity -> channels. CRITICAL reaches every configured channel;
+  # INFO stays on the agent channel only.
+  routing:
+    CRITICAL: [agent, worker, fcm, webhook, telegram]
+    WARNING: [agent, worker, telegram]
+    NOTICE: [agent, worker, telegram]
+    INFO: [agent]
+
+logging:
+  level: INFO
+  format: json  # json | text
+
+charts:
+  symbols: []  # empty = trading symbols
+  timeframes:
+    - M15
+    - H1
+    - H4
+    - D1
+  candle_count: 150
+  update_interval_seconds: 120
+
+scan_interval_seconds: 60
+reconciliation_interval_seconds: 300

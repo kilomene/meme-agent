@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# weekly-paper-review — print the structured weekly paper-trading report.
+#
+# Paper only, no network. Reads the backtest dataset and reports real
+# paper closes (last 7 days), judge replays, and whether the data is
+# thick enough to tune anything yet.
+set -euo pipefail
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO"
+exec /home/hatch/workspace/Forex-agent/.venv/bin/python \
+    daemon/launch_scanner/weekly_review.py "$@"
